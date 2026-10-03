@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Interaktif Wordwall: Artikel Ilmiah Populer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+        .card-anim {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-pink-100 text-slate-800">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="fixed inset-0 bg-pink-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-pink-50 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border-4 border-pink-400 text-center relative overflow-hidden">
+            <div class="text-6xl md:text-7xl mb-3 animate-bounce">🎮</div>
+            <h1 class="font-game text-2xl md:text-3xl font-extrabold text-pink-950 mb-1">
+                Wordwall Bahasa Indonesia
+            </h1>
+            <p class="text-xs md:text-sm text-pink-700 font-semibold">
+                Artikel Ilmiah Populer (Isu Kesehatan & Lingkungan)
+            </p>
+            <p class="text-xs font-extrabold text-pink-600 mb-6 tracking-wide">
+                by: Bunda Romi
+            </p>
+
+            <div class="bg-pink-100/70 p-4 rounded-2xl border border-pink-300 text-left space-y-4 mb-6">
+                <h2 class="font-game text-sm font-bold text-pink-950 flex items-center gap-2">
+                    👤 Isi Identitas Sebelum Bermain
+                </h2>
+                <div>
+                    <label class="block text-xs font-bold text-pink-950 mb-1">Nama Lengkap Siswa</label>
+                    <input type="text" id="start-student-name" placeholder="Masukkan Nama Lengkap..." class="w-full px-3 py-2.5 bg-pink-50 text-slate-800 placeholder-slate-400 rounded-xl text-sm border border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-pink-950 mb-1">Pilih Kelas</label>
+                    <select id="start-student-class" class="w-full px-3 py-2.5 bg-pink-50 text-slate-800 rounded-xl text-sm border border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500 font-bold">
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="9A">Kelas 9A</option>
+                        <option value="9B">Kelas 9B</option>
+                        <option value="9C">Kelas 9C</option>
+                        <option value="9D">Kelas 9D</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-game font-extrabold text-base md:text-lg py-3.5 rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                🚀 Mulai Permainan Sekarang!
+            </button>
+
+            <button onclick="skipToTeacherDashboard()" class="mt-4 text-xs font-semibold text-pink-600 hover:text-pink-800 underline transition">
+                📊 Khusus Guru: Langsung Masuk Dashboard Rekap
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-pink-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🎮</span>
+                <div>
+                    <h1 class="font-game text-xl md:text-2xl font-bold leading-none text-yellow-300">Wordwall Bahasa Indonesia</h1>
+                    <p class="text-xs text-pink-100">Teks Artikel Ilmiah Populer (Isu Kesehatan & Lingkungan)</p>
+                    <p class="text-[11px] text-pink-200 font-bold">by: Bunda Romi</p>
+                </div>
+            </div>
+            
+            <div class="flex space-x-2 flex-wrap gap-y-1">
+                <button onclick="switchTab('game1')" id="btn-game1" class="tab-btn bg-pink-100 text-pink-950 shadow px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition">
+                    1. Fakta vs Opini
+                </button>
+                <button onclick="switchTab('game2')" id="btn-game2" class="tab-btn bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition">
+                    2. Denotatif & Konotatif
+                </button>
+                <button onclick="switchTab('game3')" id="btn-game3" class="tab-btn bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition">
+                    3. Gagasan Pokok
+                </button>
+                <button onclick="switchTab('export')" id="btn-export" class="tab-btn bg-yellow-400 hover:bg-yellow-300 text-pink-950 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition">
+                    📋 Salin Teks
+                </button>
+                <button onclick="switchTab('guru')" id="btn-guru" class="tab-btn bg-emerald-500 hover:bg-emerald-400 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition shadow-md">
+                    📊 Rekap Guru
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6">
+
+        <!-- Identitas Bar -->
+        <div class="bg-pink-800 text-white rounded-2xl p-4 shadow-md mb-6 border border-pink-700">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl">👤</span>
+                    <div>
+                        <h2 class="font-game text-base font-bold text-yellow-300">Identitas Siswa</h2>
+                        <p class="text-xs text-pink-200">Data tercatat otomatis di rekap nilai guru.</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <div class="flex-1 md:flex-initial">
+                        <input type="text" id="student-name" placeholder="Nama Lengkap..." oninput="updateStudentIdentity()" class="w-full md:w-52 px-3 py-1.5 bg-pink-900 text-white placeholder-pink-300 rounded-xl text-xs border border-pink-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    </div>
+                    <div>
+                        <select id="student-class" onchange="updateStudentIdentity()" class="px-3 py-1.5 bg-pink-900 text-white rounded-xl text-xs border border-pink-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold">
+                            <option value="">Kelas</option>
+                            <option value="9A">9A</option>
+                            <option value="9B">9B</option>
+                            <option value="9C">9C</option>
+                            <option value="9D">9D</option>
+                        </select>
+                    </div>
+                    <button onclick="openWelcomeScreen()" class="bg-pink-700 hover:bg-pink-600 text-pink-100 font-bold px-3 py-1.5 rounded-xl text-xs transition border border-pink-500">
+                        🔄 Ganti
+                    </button>
+                    <button onclick="saveCurrentProgress()" class="bg-yellow-400 hover:bg-yellow-300 text-pink-950 font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow">
+                        💾 Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score & Timer Bar -->
+        <div class="bg-pink-50 rounded-2xl p-4 shadow-sm border border-pink-200 mb-6 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-4 md:space-x-8">
+                <div>
+                    <span class="text-[10px] text-pink-400 uppercase font-bold tracking-wider block">Pemain Aktif</span>
+                    <div id="active-player-display" class="font-bold text-slate-800 text-xs md:text-sm">Belum Mengisi Identitas</div>
+                </div>
+                <div class="h-8 w-px bg-pink-200"></div>
+                <div>
+                    <span class="text-[10px] text-pink-400 uppercase font-bold tracking-wider block">Skor</span>
+                    <div id="score-display" class="font-game text-2xl md:text-3xl font-extrabold text-pink-600">0</div>
+                </div>
+                <div class="h-8 w-px bg-pink-200"></div>
+                <div>
+                    <span class="text-[10px] text-pink-400 uppercase font-bold tracking-wider block">Waktu</span>
+                    <div id="timer-display" class="font-game text-xl md:text-2xl font-bold text-slate-700">00:00</div>
+                </div>
+            </div>
+            <button onclick="resetCurrentGame()" class="bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                🔄 Reset Game
+            </button>
+        </div>
+
+        <!-- GAME 1: FAKTA VS OPINI (Satu Per Satu) -->
+        <section id="tab-game1" class="tab-content">
+            <div class="bg-pink-100/60 border border-pink-200 rounded-2xl p-4 mb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="font-game text-base md:text-lg font-bold text-pink-900 flex items-center gap-2">
+                        🎯 Game 1: Detektif Fakta vs Opini
+                    </h2>
+                    <p class="text-xs text-pink-800">Amatilah ilustrasi dan kalimat, lalu tentukan apakah termasuk <strong>Fakta</strong> atau <strong>Opini</strong>!</p>
+                </div>
+                <div class="text-right">
+                    <span id="g1-progress-text" class="font-game text-xs md:text-sm font-bold text-pink-900">Soal 1 dari 10</span>
+                </div>
+            </div>
+
+            <!-- Progres Bar -->
+            <div class="w-full bg-pink-200 h-2.5 rounded-full mb-6 overflow-hidden">
+                <div id="g1-progress-bar" class="bg-gradient-to-r from-pink-500 to-rose-500 h-2.5 rounded-full transition-all duration-300" style="width: 10%;"></div>
+            </div>
+
+            <!-- Single Question Card Container -->
+            <div id="g1-card-container" class="bg-pink-50 rounded-3xl p-6 shadow-md border border-pink-200 card-anim max-w-2xl mx-auto text-center">
+                <!-- Content injected via JS -->
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="flex justify-between items-center max-w-2xl mx-auto mt-4">
+                <button onclick="prevG1Question()" id="g1-btn-prev" class="bg-pink-200 hover:bg-pink-300 text-pink-900 font-bold px-4 py-2 rounded-xl text-xs transition disabled:opacity-40">
+                    ⬅️ Soal Sebelumnya
+                </button>
+                <div id="g1-dots" class="flex gap-1.5"></div>
+                <button onclick="nextG1Question()" id="g1-btn-next" class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                    Soal Berikutnya ➡️
+                </button>
+            </div>
+        </section>
+
+        <!-- GAME 2: DENOTATIF VS KONOTATIF (Satu Per Satu) -->
+        <section id="tab-game2" class="tab-content hidden">
+            <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="font-game text-base md:text-lg font-bold text-purple-900 flex items-center gap-2">
+                        🔍 Game 2: Detektif Makna (Denotatif vs Konotatif)
+                    </h2>
+                    <p class="text-xs text-purple-700">Tentukan makna kata yang bercetak tebal dalam kalimat berikut!</p>
+                </div>
+                <div class="text-right">
+                    <span id="g2-progress-text" class="font-game text-xs md:text-sm font-bold text-purple-800">Soal 1 dari 5</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-pink-200 h-2.5 rounded-full mb-6 overflow-hidden">
+                <div id="g2-progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-300" style="width: 20%;"></div>
+            </div>
+
+            <div id="g2-card-container" class="bg-pink-50 rounded-3xl p-6 shadow-md border border-pink-200 card-anim max-w-2xl mx-auto">
+                <!-- Injected JS -->
+            </div>
+
+            <div class="flex justify-between items-center max-w-2xl mx-auto mt-4">
+                <button onclick="prevG2Question()" id="g2-btn-prev" class="bg-pink-200 hover:bg-pink-300 text-pink-900 font-bold px-4 py-2 rounded-xl text-xs transition">
+                    ⬅️ Soal Sebelumnya
+                </button>
+                <div id="g2-dots" class="flex gap-1.5"></div>
+                <button onclick="nextG2Question()" id="g2-btn-next" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                    Soal Berikutnya ➡️
+                </button>
+            </div>
+        </section>
+
+        <!-- GAME 3: GAGASAN POKOK (Satu Per Satu) -->
+        <section id="tab-game3" class="tab-content hidden">
+            <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 mb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="font-game text-base md:text-lg font-bold text-teal-900 flex items-center gap-2">
+                        💡 Game 3: Detektif Gagasan Pokok
+                    </h2>
+                    <p class="text-xs text-teal-700">Baca cuplikan artikel dan tentukan inti/gagasan utamanya!</p>
+                </div>
+                <div class="text-right">
+                    <span id="g3-progress-text" class="font-game text-xs md:text-sm font-bold text-teal-800">Soal 1 dari 5</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-pink-200 h-2.5 rounded-full mb-6 overflow-hidden">
+                <div id="g3-progress-bar" class="bg-gradient-to-r from-teal-500 to-pink-500 h-2.5 rounded-full transition-all duration-300" style="width: 20%;"></div>
+            </div>
+
+            <div id="g3-card-container" class="bg-pink-50 rounded-3xl p-6 shadow-md border border-pink-200 card-anim max-w-2xl mx-auto">
+                <!-- Injected JS -->
+            </div>
+
+            <div class="flex justify-between items-center max-w-2xl mx-auto mt-4">
+                <button onclick="prevG3Question()" id="g3-btn-prev" class="bg-pink-200 hover:bg-pink-300 text-pink-900 font-bold px-4 py-2 rounded-xl text-xs transition">
+                    ⬅️ Soal Sebelumnya
+                </button>
+                <div id="g3-dots" class="flex gap-1.5"></div>
+                <button onclick="nextG3Question()" id="g3-btn-next" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                    Soal Berikutnya ➡️
+                </button>
+            </div>
+        </section>
+
+        <!-- EXPORT TAB -->
+        <section id="tab-export" class="tab-content hidden">
+            <div class="bg-pink-100 border border-pink-200 rounded-2xl p-6">
+                <h2 class="font-game text-xl font-bold text-pink-950 mb-2">
+                    📋 Teks Format Siap Salin ke Wordwall.net
+                </h2>
+                <p class="text-xs md:text-sm text-pink-800 mb-6">
+                    Salin teks di bawah ini dan tempelkan (*paste*) langsung saat membuat aktivitas baru di <a href="https://wordwall.net" target="_blank" class="underline font-bold text-pink-900">Wordwall.net</a>!
+                </p>
+
+                <div class="bg-pink-50 rounded-xl p-4 border border-pink-200 mb-4 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-pink-950 text-xs md:text-sm">1. Game Fakta vs Opini</h3>
+                        <button onclick="copyToClipboard('export-fakta-opini')" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1 rounded-lg text-xs font-semibold">📋 Salin</button>
+                    </div>
+                    <textarea id="export-fakta-opini" readonly class="w-full h-32 p-3 bg-white border border-pink-200 rounded-lg text-xs font-mono text-slate-700"></textarea>
+                </div>
+
+                <div class="bg-pink-50 rounded-xl p-4 border border-pink-200 mb-4 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-pink-950 text-xs md:text-sm">2. Game Denotatif vs Konotatif</h3>
+                        <button onclick="copyToClipboard('export-denotatif')" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1 rounded-lg text-xs font-semibold">📋 Salin</button>
+                    </div>
+                    <textarea id="export-denotatif" readonly class="w-full h-32 p-3 bg-white border border-pink-200 rounded-lg text-xs font-mono text-slate-700"></textarea>
+                </div>
+
+                <div class="bg-pink-50 rounded-xl p-4 border border-pink-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-pink-950 text-xs md:text-sm">3. Game Gagasan Pokok</h3>
+                        <button onclick="copyToClipboard('export-gagasan')" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1 rounded-lg text-xs font-semibold">📋 Salin</button>
+                    </div>
+                    <textarea id="export-gagasan" readonly class="w-full h-32 p-3 bg-white border border-pink-200 rounded-lg text-xs font-mono text-slate-700"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD GURU -->
+        <section id="tab-guru" class="tab-content hidden">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-6">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h2 class="font-game text-xl font-bold text-emerald-900 flex items-center gap-2">
+                            📊 Dashboard Rekap Nilai Siswa
+                        </h2>
+                        <p class="text-xs text-emerald-700">Pantau hasil pengerjaan game siswa kelas 9A, 9B, 9C, dan 9D.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-2">
+                            📥 Unduh Excel / CSV
+                        </button>
+                        <button onclick="resetAllScores()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-xl text-xs shadow transition">
+                            🗑️ Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-pink-50 rounded-2xl p-4 border border-pink-200 shadow-sm mb-4 flex flex-wrap justify-between items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase mr-1">Filter:</label>
+                    <button onclick="filterTeacherClass('ALL')" id="filter-btn-ALL" class="class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-600 text-white">Semua</button>
+                    <button onclick="filterTeacherClass('9A')" id="filter-btn-9A" class="class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-100 text-slate-600">9A</button>
+                    <button onclick="filterTeacherClass('9B')" id="filter-btn-9B" class="class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-100 text-slate-600">9B</button>
+                    <button onclick="filterTeacherClass('9C')" id="filter-btn-9C" class="class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-100 text-slate-600">9C</button>
+                    <button onclick="filterTeacherClass('9D')" id="filter-btn-9D" class="class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-100 text-slate-600">9D</button>
+                </div>
+                <div>
+                    <input type="text" id="search-student" oninput="renderTeacherTable()" placeholder="🔍 Cari nama..." class="px-3 py-1.5 border border-pink-300 rounded-xl text-xs w-44 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                </div>
+            </div>
+
+            <div class="bg-pink-50 rounded-2xl border border-pink-200 shadow-sm overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-pink-200/70 text-pink-950 border-b border-pink-300 font-bold uppercase tracking-wider">
+                            <th class="p-3 text-center w-12">No</th>
+                            <th class="p-3">Nama Siswa</th>
+                            <th class="p-3 text-center">Kelas</th>
+                            <th class="p-3 text-center">Skor</th>
+                            <th class="p-3 text-center">Durasi</th>
+                            <th class="p-3 text-center">Tanggal</th>
+                            <th class="p-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table-body" class="divide-y divide-pink-200/50"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-pink-50 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-pink-300 transform transition-all scale-95">
+            <div id="modal-icon" class="text-5xl mb-2">🎉</div>
+            <h3 id="modal-title" class="font-game text-2xl font-bold text-slate-800 mb-2">Hebat!</h3>
+            <p id="modal-message" class="text-xs md:text-sm text-slate-600 mb-6">Jawaban kamu sangat tepat!</p>
+            <button onclick="closeModal()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl font-game shadow-lg transition">
+                Lanjutkan Permainan 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Celebration Finish Modal -->
+    <div id="finish-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-pink-50 rounded-3xl p-6 md:p-8 max-w-md w-full text-center shadow-2xl border-4 border-yellow-400 relative overflow-hidden">
+            <div class="text-6xl mb-3 animate-bounce">🏆</div>
+            <h3 class="font-game text-2xl md:text-3xl font-extrabold text-pink-950 mb-1">SELAMAT! SELESAI!</h3>
+            <p id="finish-student-name" class="text-pink-600 font-bold text-sm md:text-base mb-3">Siswa Luar Biasa</p>
+            
+            <div class="bg-pink-100 border border-pink-200 rounded-2xl p-4 mb-6">
+                <span class="text-xs uppercase text-pink-500 font-bold tracking-wider block">Skor Akhir Kamu</span>
+                <span id="finish-score" class="font-game text-4xl font-black text-pink-600">0</span>
+                <p id="finish-eval" class="text-xs font-semibold text-emerald-600 mt-2">🎉 Kamu menyelesaikan permainan ini dengan sangat baik!</p>
+            </div>
+
+            <button onclick="closeFinishModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl font-game shadow-lg transition">
+                Lihat Hasil & Rekap Skor 📊
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // System State
+        let score = 0;
+        let activeTab = 'game1';
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let autoAdvancePending = false;
+
+        let currentG1Idx = 0;
+        let currentG2Idx = 0;
+        let currentG3Idx = 0;
+
+        let g1Answers = {};
+        let g2Answers = {};
+        let g3Answers = {};
+
+        let currentStudent = { name: '', class: '' };
+
+        // Database Soal dengan SVG Ilustrasi Visual Interaktif
+        const faktaOpiniData = [
+            {
+                id: 1,
+                text: "Berdasarkan data WHO, sekitar 9 dari 10 orang di dunia menghirup udara yang tercemar polusi tinggi.",
+                type: "FAKTA",
+                reason: "Memuat rujukan data resmi dari lembaga kesehatan dunia (WHO).",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#e0f2fe"/><path d="M40 90 L40 50 L60 50 L60 90" fill="#64748b"/><path d="M70 90 L70 40 L90 40 L90 90" fill="#475569"/><path d="M50 35 C50 20, 70 20, 60 10 C80 10, 80 30, 60 35 Z" fill="#94a3b8" opacity="0.8"/><circle cx="140" cy="50" r="28" fill="#38bdf8" opacity="0.3"/><path d="M125 50 L135 60 L155 40" stroke="#0284c7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><text x="140" y="95" font-size="10" font-weight="bold" fill="#0369a1" text-anchor="middle">WHO Data</text></svg>`
+            },
+            {
+                id: 2,
+                text: "Menurut saya, membawa botol minum sendiri ke sekolah adalah langkah paling keren untuk mengurangi sampah.",
+                type: "OPINI",
+                reason: "Memuat ungkapan pendapat pribadi ('menurut saya') dan kata sifat subjektif ('paling keren').",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#fef3c7"/><rect x="85" y="30" width="30" height="60" rx="8" fill="#10b981"/><rect x="92" y="20" width="16" height="10" rx="3" fill="#047857"/><path d="M100 45 L100 75" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/><circle cx="145" cy="35" r="16" fill="#f59e0b"/><text x="145" y="40" font-size="14" text-anchor="middle">💭</text></svg>`
+            },
+            {
+                id: 3,
+                text: "Sampah plastik membutuhkan waktu hingga 500 tahun untuk dapat terurai secara alami di dalam tanah.",
+                type: "FAKTA",
+                reason: "Memuat angka dan durasi pasti berdasarkan hasil pengujian riset ilmiah.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#ecfdf5"/><path d="M20 90 Q 100 80, 180 90 L180 110 L20 110 Z" fill="#059669"/><path d="M85 50 L115 50 L110 80 L90 80 Z" fill="#34d399" opacity="0.8"/><text x="100" y="40" font-size="14" font-weight="bold" fill="#047857" text-anchor="middle">⏳ 500 TAHUN</text></svg>`
+            },
+            {
+                id: 4,
+                text: "Konsumsi minuman berpenyedap manis diperkirakan akan memicu kenaikan angka penderita diabetes remaja.",
+                type: "OPINI",
+                reason: "Memuat kata dugaan/perkiraan masa depan ('diperkirakan').",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#fce7f3"/><rect x="80" y="35" width="40" height="60" rx="6" fill="#f43f5e"/><path d="M100 15 L100 35" stroke="#be123c" stroke-width="4"/><path d="M80 55 Q 100 45, 120 55" stroke="#ffffff" stroke-width="3" fill="none"/><text x="100" y="108" font-size="10" font-weight="bold" fill="#9f1239" text-anchor="middle">⚠️ Prediksi Risiko</text></svg>`
+            },
+            {
+                id: 5,
+                text: "Kementerian Kesehatan mencatat peningkatan kasus penyakit ISPA sebesar 18% akibat polusi udara.",
+                type: "FAKTA",
+                reason: "Memuat data statistik persentase spesifik dari lembaga resmi Kemenkes.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#eff6ff"/><path d="M70 65 Q 85 40, 100 65 Q 115 40, 130 65" stroke="#2563eb" stroke-width="4" fill="none"/><rect x="85" y="70" width="30" height="30" rx="6" fill="#3b82f6"/><path d="M100 76 L100 94 M91 85 L109 85" stroke="#ffffff" stroke-width="3"/><text x="100" y="30" font-size="12" font-weight="bold" fill="#1e40af" text-anchor="middle">📈 +18% ISPA</text></svg>`
+            },
+            {
+                id: 6,
+                text: "Sebaiknya kantin sekolah melarang secara total penjualan makanan berkemasan plastik sekali pakai.",
+                type: "OPINI",
+                reason: "Memuat kalimat saran dan imbuhan usulan ('sebaiknya').",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#fff7ed"/><path d="M50 85 L150 85 L140 45 L60 45 Z" fill="#f97316"/><rect x="85" y="25" width="30" height="20" fill="#fdba74"/><text x="100" y="105" font-size="11" font-weight="bold" fill="#c2410c" text-anchor="middle">💡 Saran Kantin</text></svg>`
+            },
+            {
+                id: 7,
+                text: "Berdasarkan data KLHK tahun 2023, Indonesia menghasilkan sekitar 19,4 juta ton sampah per tahun.",
+                type: "FAKTA",
+                reason: "Memuat angka spesifik hasil rekapitulasi data resmi KLHK.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f0fdf4"/><rect x="70" y="40" width="60" height="50" rx="8" fill="#16a34a"/><path d="M80 30 L120 30 L115 40 L85 40 Z" fill="#15803d"/><text x="100" y="70" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">19,4 Juta Ton</text></svg>`
+            },
+            {
+                id: 8,
+                text: "Menurut sebagian siswa, rasa makanan organik kurang lezat dibanding makanan cepat saji.",
+                type: "OPINI",
+                reason: "Memuat gagasan cita rasa subjektif ('kurang lezat') menurut pandangan kelompok tertentu.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#faf5ff"/><circle cx="70" cy="60" r="22" fill="#a855f7"/><text x="70" y="65" font-size="16" text-anchor="middle">🥗</text><circle cx="130" cy="60" r="22" fill="#ec4899"/><text x="130" y="65" font-size="16" text-anchor="middle">🍔</text><text x="100" y="105" font-size="10" font-weight="bold" fill="#7e22ce" text-anchor="middle">Selera Makanan</text></svg>`
+            },
+            {
+                id: 9,
+                text: "Penelitian IPB menunjukkan bahwa kandungan mikroplastik ditemukan pada 80% sampel ikan air tawar.",
+                type: "FAKTA",
+                reason: "Memuat temuan riset akademis IPB yang teruji ilmiah beserta data 80%.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#e0f2fe"/><path d="M60 60 C90 40, 120 80, 140 60 L150 70 L150 50 Z" fill="#0284c7"/><circle cx="85" cy="55" r="3" fill="#ffffff"/><circle cx="100" cy="62" r="2" fill="#ef4444"/><circle cx="115" cy="58" r="2" fill="#ef4444"/><text x="100" y="105" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Riset IPB (80%)</text></svg>`
+            },
+            {
+                id: 10,
+                text: "Alangkah baiknya jika setiap hari Jumat diselenggarakan kegiatan jalan sehat untuk seluruh warga sekolah.",
+                type: "OPINI",
+                reason: "Memuat kalimat ekspresi harapan/keinginan subjektif ('alangkah baiknya').",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#fef2f2"/><path d="M70 75 Q 85 45, 100 75 Q 115 45, 130 75" stroke="#ef4444" stroke-width="4" fill="none"/><text x="100" y="38" font-size="22" text-anchor="middle">🏃‍♂️✨</text><text x="100" y="105" font-size="10" font-weight="bold" fill="#b91c1c" text-anchor="middle">Usulan Jalan Sehat</text></svg>`
+            }
+        ];
+
+        const denotatifData = [
+            {
+                id: 1,
+                sentence: "Tumpukan sampah plastik telah acapkali <strong>menggagalkan</strong> aliran air hingga memicu banjir.",
+                word: "Menggagalkan",
+                options: [
+                    { label: "Denotatif (Membuat mampet / tidak lancar secara fisik)", correct: true },
+                    { label: "Konotatif (Membuat kecewa / patah hati)", correct: false }
+                ],
+                explanation: "Kata 'menggagalkan' di sini bermakna denotatif (fisik), yaitu menyumbat aliran air.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f0f9ff"/><rect x="30" y="50" width="140" height="25" rx="4" fill="#94a3b8"/><path d="M30 55 L90 55" stroke="#0284c7" stroke-width="8"/><rect x="90" y="45" width="25" height="35" rx="4" fill="#ef4444"/><text x="100" y="105" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Aliran Air Mampet</text></svg>`
+            },
+            {
+                id: 2,
+                sentence: "Semangat murid-murid dalam menjaga kebersihan kelas sangat <strong>menular</strong> ke sekolah lain.",
+                word: "Menular",
+                options: [
+                    { label: "Denotatif (Berpindahnya kuman / penyakit)", correct: false },
+                    { label: "Konotatif (Memberikan pengaruh positif / meluas)", correct: true }
+                ],
+                explanation: "Kata 'menular' digunakan secara kiasan (konotatif) untuk menggambarkan pengaruh kebiasaan baik.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#faf5ff"/><circle cx="60" cy="60" r="20" fill="#a855f7"/><circle cx="100" cy="60" r="20" fill="#c084fc"/><circle cx="140" cy="60" r="20" fill="#e9d5ff"/><text x="100" y="105" font-size="11" font-weight="bold" fill="#6b21a8" text-anchor="middle">Penyebaran Inspirasi</text></svg>`
+            },
+            {
+                id: 3,
+                sentence: "Suhu tubuh adik naik hingga 38 derajat Celsius karena terkena <strong>demam</strong>.",
+                word: "Demam",
+                options: [
+                    { label: "Denotatif (Kondisi medis fisik suhu tubuh tinggi)", correct: true },
+                    { label: "Konotatif (Gandrung / tren kegemaran sesuatu)", correct: false }
+                ],
+                explanation: "Kata 'demam' merujuk langsung pada kondisi fisik suhu tubuh tinggi (makna denotatif/sebenarnya).",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#fff1f2"/><rect x="92" y="25" width="16" height="60" rx="8" fill="#fda4af"/><circle cx="100" cy="80" r="14" fill="#e11d48"/><rect x="96" y="45" width="8" height="35" fill="#e11d48"/><text x="100" y="110" font-size="11" font-weight="bold" fill="#be123c" text-anchor="middle">Suhu Tubuh 38°C</text></svg>`
+            },
+            {
+                id: 4,
+                sentence: "Hutan mangrove berfungsi sebagai benteng <strong>hijau</strong> yang melindungi pesisir dari abrasi.",
+                word: "Hijau",
+                options: [
+                    { label: "Denotatif (Warna pigmen klorofil pada daun)", correct: false },
+                    { label: "Konotatif (Pelindung lingkungan alami / kiasan ekologis)", correct: true }
+                ],
+                explanation: "Kata 'hijau' di sini bermakna konotatif, mewakili gerakan pelestarian ekosistem dan pelindung lingkungan.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f0fdf4"/><path d="M60 85 L140 85 L100 35 Z" fill="#16a34a"/><rect x="95" y="85" width="10" height="15" fill="#15803d"/><text x="100" y="112" font-size="11" font-weight="bold" fill="#14532d" text-anchor="middle">Benteng Ekologis</text></svg>`
+            },
+            {
+                id: 5,
+                sentence: "Organ ginjal bertugas <strong>menyaring</strong> sisa metabolisme dan racun dari dalam darah manusia.",
+                word: "Menyaring",
+                options: [
+                    { label: "Denotatif (Memisahkan zat kotoran secara biologis organ tubuh)", correct: true },
+                    { label: "Konotatif (Memilih informasi baik dan buruk di media sosial)", correct: false }
+                ],
+                explanation: "Kata 'menyaring' merujuk pada kerja fisiologis biologis organ tubuh sebenarnya (denotatif).",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f0f9ff"/><path d="M70 40 L130 40 L110 80 L90 80 Z" fill="#0ea5e9"/><line x1="70" y1="40" x2="130" y2="40" stroke="#0284c7" stroke-width="4"/><text x="100" y="105" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Filtrasi Biologis</text></svg>`
+            }
+        ];
+
+        const gagasanData = [
+            {
+                id: 1,
+                paragraph: "Polusi udara di kawasan perkotaan kini berada pada level yang mengkhawatirkan. Asap kendaraan bermotor dan kegiatan industri menjadi penyumbang utama penurunan kualitas udara. Jika dibiarkan, kondisi ini dapat merusak organ pernapasan masyarakat, terutama anak-anak.",
+                options: [
+                    "Polusi udara di perkotaan sudah berada pada level yang mengkhawatirkan.",
+                    "Anak-anak sangat rentan terkena penyakit pernapasan.",
+                    "Asap industri harus ditutup secara total.",
+                    "Kendaraan bermotor adalah satu-satunya sumber polusi."
+                ],
+                correctIndex: 0,
+                explanation: "Gagasan pokok paragraf terletak di awal kalimat (deduktif), yaitu kondisi polusi udara perkotaan yang mengkhawatirkan.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f1f5f9"/><rect x="40" y="50" width="25" height="50" fill="#64748b"/><rect x="70" y="35" width="30" height="65" fill="#475569"/><rect x="105" y="60" width="20" height="40" fill="#64748b"/><path d="M40 30 C60 20, 100 20, 140 30 C120 40, 80 30, 40 30" fill="#94a3b8" opacity="0.7"/><text x="100" y="112" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">Kualitas Udara Kota</text></svg>`
+            },
+            {
+                id: 2,
+                paragraph: "Mengonsumsi air putih minimal 2 liter per hari memiliki banyak manfaat bagi kesehatan tubuh. Selain menjaga kelembapan kulit, asupan air yang cukup membantu fungsi ginjal bekerja secara optimal. Oleh karena itu, membiasakan minum air putih harus dimulai sejak dini.",
+                options: [
+                    "Ginjal adalah organ tubuh yang paling penting.",
+                    "Manfaat penting mengonsumsi air putih minimal 2 liter sehari bagi tubuh.",
+                    "Anak-anak tidak suka minum air putih.",
+                    "Kulit lembap hanya bisa didapatkan dari minuman manis."
+                ],
+                correctIndex: 1,
+                explanation: "Gagasan pokok membahas rincian manfaat penting minum air putih 2 liter per hari.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#e0f2fe"/><rect x="80" y="30" width="40" height="65" rx="6" fill="#38bdf8" opacity="0.8"/><path d="M80 50 Q 100 45, 120 50 L120 95 L80 95 Z" fill="#0284c7"/><text x="100" y="112" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Hidrasi 2 Liter/Hari</text></svg>`
+            },
+            {
+                id: 3,
+                paragraph: "Memilah sampah organik dan anorganik dari rumah tangga merupakan langkah awal dalam mengatasi krisis lingkungan. Dengan memilah sampah, proses daur ulang menjadi jauh lebih efisien dan mengurangi beban tempat pembuangan akhir.",
+                options: [
+                    "Sampah plastik tidak bisa didaur ulang sama sekali.",
+                    "Memilah sampah rumah tangga merupakan langkah awal penting mengatasi krisis lingkungan.",
+                    "Tempat Pembuangan Akhir (TPA) sudah penuh dengan sampah anorganik.",
+                    "Pemerintah wajib mengambil sampah ke setiap rumah warga."
+                ],
+                correctIndex: 1,
+                explanation: "Gagasan pokok menekankan pentingnya memilah sampah rumah tangga sebagai solusi awal krisis lingkungan.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#f0fdf4"/><rect x="60" y="45" width="30" height="45" rx="4" fill="#22c55e"/><rect x="110" y="45" width="30" height="45" rx="4" fill="#3b82f6"/><text x="75" y="70" font-size="12" text-anchor="middle">🍌</text><text x="125" y="70" font-size="12" text-anchor="middle">🍾</text><text x="100" y="110" font-size="10" font-weight="bold" fill="#15803d" text-anchor="middle">Pemilahan Sampah</text></svg>`
+            },
+            {
+                id: 4,
+                paragraph: "Tidur cukup selama 7–8 jam sehari sangat krusial bagi kesehatan mental dan fisik remaja. Saat tidur, tubuh melakukan pemulihan sel-sel otak dan memperbaiki jaringan tubuh yang rusak. Kurang tidur dapat menurunkan konsentrasi belajar.",
+                options: [
+                    "Remaja sering mengalami depresi saat belajar di sekolah.",
+                    "Pentingnya tidur cukup 7-8 jam sehari bagi kesehatan fisik dan mental remaja.",
+                    "Otak manusia berhenti bekerja secara total saat malam hari.",
+                    "Siswa tidak perlu belajar jika sudah tidur cukup."
+                ],
+                correctIndex: 1,
+                explanation: "Gagasan pokok menjelaskan pentingnya kecukupan waktu tidur (7-8 jam) bagi fisik dan mental remaja.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#faf5ff"/><path d="M120 30 A 25 25 0 1 0 145 65 A 30 30 0 1 1 120 30 Z" fill="#a855f7"/><text x="75" y="65" font-size="22" text-anchor="middle">😴💤</text><text x="100" y="110" font-size="11" font-weight="bold" fill="#6b21a8" text-anchor="middle">Istirahat 7-8 Jam</text></svg>`
+            },
+            {
+                id: 5,
+                paragraph: "Penanaman pohon di area sekolah tidak hanya memperindah pemandangan, tetapi juga menciptakan iklim mikro yang sejuk. Dedaunan pohon menyerap karbondioksida dan menghasilkan oksigen segar bagi warga sekolah.",
+                options: [
+                    "Pohon adalah satu-satunya penyerap asap kendaraan.",
+                    "Manfaat positif penghijauan dan penanaman pohon di lingkungan sekolah.",
+                    "Siswa wajib membawa tanaman setiap hari Senin.",
+                    "Pemandangan sekolah hanya bagus jika ada pohon buah."
+                ],
+                correctIndex: 1,
+                explanation: "Gagasan pokok merangkum manfaat positif penghijauan dan penanaman pohon di sekolah.",
+                svg: `<svg viewBox="0 0 200 120" class="w-36 h-24 mx-auto mb-2"><rect width="200" height="120" rx="16" fill="#ecfdf5"/><circle cx="100" cy="50" r="30" fill="#10b981"/><rect x="94" y="70" width="12" height="25" fill="#047857"/><text x="100" y="112" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">Penghijauan Sekolah</text></svg>`
+            }
+        ];
+
+        // Session Control Functions
+        function startGameSession() {
+            const nameInput = document.getElementById('start-student-name').value.trim();
+            const classSelect = document.getElementById('start-student-class').value;
+
+            if (!nameInput || !classSelect) {
+                showModal('⚠️ Identitas Belum Lengkap', 'Silakan isi Nama Lengkap dan pilih Kelas terlebih dahulu!', '⚠️');
+                return;
+            }
+
+            currentStudent.name = nameInput;
+            currentStudent.class = classSelect;
+
+            document.getElementById('student-name').value = nameInput;
+            document.getElementById('student-class').value = classSelect;
+
+            updateStudentIdentity();
+            document.getElementById('welcome-screen').classList.add('hidden');
+
+            playSound('correct');
+            initTimer();
+            renderG1Question();
+            renderG2Question();
+            renderG3Question();
+        }
+
+        function skipToTeacherDashboard() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            switchTab('guru');
+        }
+
+        function openWelcomeScreen() {
+            document.getElementById('welcome-screen').classList.remove('hidden');
+        }
+
+        function updateStudentIdentity() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classSelect = document.getElementById('student-class').value;
+            currentStudent.name = nameInput;
+            currentStudent.class = classSelect;
+
+            const display = document.getElementById('active-player-display');
+            if (display) {
+                if (currentStudent.name && currentStudent.class) {
+                    display.innerText = `${currentStudent.name} (${currentStudent.class})`;
+                } else if (currentStudent.name) {
+                    display.innerText = `${currentStudent.name}`;
+                } else {
+                    display.innerText = 'Belum Mengisi Identitas';
+                }
+            }
+        }
+
+        // GAME 1 RENDER (Satu per satu)
+        function renderG1Question() {
+            const item = faktaOpiniData[currentG1Idx];
+            const container = document.getElementById('g1-card-container');
+            const answered = g1Answers[item.id];
+
+            document.getElementById('g1-progress-text').innerText = `Soal ${currentG1Idx + 1} dari ${faktaOpiniData.length}`;
+            document.getElementById('g1-progress-bar').style.width = `${((currentG1Idx + 1) / faktaOpiniData.length) * 100}%`;
+
+            let actionButtons = `
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <button onclick="submitG1Answer('FAKTA')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-game font-bold py-3.5 px-4 rounded-2xl shadow-md text-base transition transform active:scale-95 flex items-center justify-center gap-2">
+                        ✅ ZONA FAKTA
+                    </button>
+                    <button onclick="submitG1Answer('OPINI')" class="bg-amber-500 hover:bg-amber-600 text-white font-game font-bold py-3.5 px-4 rounded-2xl shadow-md text-base transition transform active:scale-95 flex items-center justify-center gap-2">
+                        💭 ZONA OPINI
+                    </button>
+                </div>
+            `;
+
+            if (answered) {
+                actionButtons = `
+                    <div class="mt-6 p-4 rounded-2xl ${answered.isCorrect ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-rose-100 text-rose-900 border border-rose-300'} text-xs font-medium">
+                        <div class="font-bold text-sm mb-1">${answered.isCorrect ? '✓ Jawaban Anda Benar!' : '❌ Jawaban Sebelumnya Kurang Tepat'}</div>
+                        <p>${item.reason}</p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="mb-2">${item.svg}</div>
+                <span class="inline-block bg-indigo-100 text-indigo-800 text-[11px] font-extrabold px-3 py-1 rounded-full mb-3">
+                    SOAL KASUS ${currentG1Idx + 1}
+                </span>
+                <p class="text-sm md:text-base font-semibold text-slate-800 leading-relaxed mb-2">
+                    "${item.text}"
+                </p>
+                ${actionButtons}
+            `;
+
+            document.getElementById('g1-btn-prev').disabled = currentG1Idx === 0;
+            renderDots('g1-dots', faktaOpiniData.length, currentG1Idx, g1Answers, (idx) => { currentG1Idx = idx; renderG1Question(); });
+        }
+
+        function submitG1Answer(selectedType) {
+            const item = faktaOpiniData[currentG1Idx];
+            if (g1Answers[item.id]) return;
+
+            const isCorrect = item.type === selectedType;
+            g1Answers[item.id] = { selected: selectedType, isCorrect };
+            autoAdvancePending = true;
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 100;
+                updateScore();
+                showModal('🎉 Benar!', item.reason, '🎉');
+            } else {
+                playSound('wrong');
+                showModal('❌ Kurang Tepat', `Kalimat ini adalah ${item.type}.\n\nAlasan: ${item.reason}`, '❌');
+            }
+
+            renderG1Question();
+            if (currentStudent.name && currentStudent.class) saveCurrentProgress();
+
+            if (Object.keys(g1Answers).length >= faktaOpiniData.length) {
+                setTimeout(triggerFinishCelebration, 1200);
+            }
+        }
+
+        function nextG1Question() {
+            if (currentG1Idx < faktaOpiniData.length - 1) {
+                currentG1Idx++;
+                renderG1Question();
+            }
+        }
+        function prevG1Question() {
+            if (currentG1Idx > 0) {
+                currentG1Idx--;
+                renderG1Question();
+            }
+        }
+
+        // GAME 2 RENDER (Satu per satu)
+        function renderG2Question() {
+            const item = denotatifData[currentG2Idx];
+            const container = document.getElementById('g2-card-container');
+            const answered = g2Answers[item.id];
+
+            document.getElementById('g2-progress-text').innerText = `Soal ${currentG2Idx + 1} dari ${denotatifData.length}`;
+            document.getElementById('g2-progress-bar').style.width = `${((currentG2Idx + 1) / denotatifData.length) * 100}%`;
+
+            container.innerHTML = `
+                <div class="mb-2 text-center">${item.svg}</div>
+                <span class="inline-block bg-purple-100 text-purple-800 text-[11px] font-extrabold px-3 py-1 rounded-full mb-3">
+                    SOAL MAKNA ${currentG2Idx + 1}
+                </span>
+                <p class="text-sm md:text-base font-semibold text-slate-800 text-center mb-4 leading-relaxed">
+                    "${item.sentence}"
+                </p>
+                <div class="space-y-3">
+                    ${item.options.map((opt, oIdx) => `
+                        <button onclick="submitG2Answer(${opt.correct}, '${item.explanation.replace(/'/g, "\\'")}')" ${answered ? 'disabled' : ''} class="w-full text-left p-3.5 rounded-2xl border ${answered ? (opt.correct ? 'bg-purple-100 border-purple-400 font-bold' : 'bg-slate-50 border-slate-200 opacity-60') : 'border-slate-200 hover:border-purple-500 hover:bg-purple-50'} text-xs md:text-sm font-medium transition flex items-center justify-between">
+                            <span>${opt.label}</span>
+                            ${answered && opt.correct ? '<span>✅</span>' : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('g2-btn-prev').disabled = currentG2Idx === 0;
+            renderDots('g2-dots', denotatifData.length, currentG2Idx, g2Answers, (idx) => { currentG2Idx = idx; renderG2Question(); });
+        }
+
+        function submitG2Answer(isCorrect, explanation) {
+            const item = denotatifData[currentG2Idx];
+            if (g2Answers[item.id]) return;
+
+            g2Answers[item.id] = { isCorrect };
+            autoAdvancePending = true;
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 100;
+                updateScore();
+                showModal('✨ Jawaban Tepat!', explanation, '✨');
+            } else {
+                playSound('wrong');
+                showModal('❌ Belum Tepat', explanation, '❌');
+            }
+
+            renderG2Question();
+            if (currentStudent.name && currentStudent.class) saveCurrentProgress();
+
+            if (Object.keys(g2Answers).length >= denotatifData.length) {
+                setTimeout(triggerFinishCelebration, 1200);
+            }
+        }
+
+        function nextG2Question() {
+            if (currentG2Idx < denotatifData.length - 1) {
+                currentG2Idx++;
+                renderG2Question();
+            }
+        }
+        function prevG2Question() {
+            if (currentG2Idx > 0) {
+                currentG2Idx--;
+                renderG2Question();
+            }
+        }
+
+        // GAME 3 RENDER (Satu per satu)
+        function renderG3Question() {
+            const item = gagasanData[currentG3Idx];
+            const container = document.getElementById('g3-card-container');
+            const answered = g3Answers[item.id];
+
+            document.getElementById('g3-progress-text').innerText = `Soal ${currentG3Idx + 1} dari ${gagasanData.length}`;
+            document.getElementById('g3-progress-bar').style.width = `${((currentG3Idx + 1) / gagasanData.length) * 100}%`;
+
+            container.innerHTML = `
+                <div class="mb-2 text-center">${item.svg}</div>
+                <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs md:text-sm text-slate-700 italic mb-4 leading-relaxed">
+                    "${item.paragraph}"
+                </div>
+                <span class="text-xs font-bold text-slate-600 block mb-2">Pilih Gagasan Pokok Paragraf:</span>
+                <div class="space-y-2.5">
+                    ${item.options.map((opt, oIdx) => `
+                        <button onclick="submitG3Answer(${oIdx === item.correctIndex}, '${item.explanation.replace(/'/g, "\\'")}')" ${answered ? 'disabled' : ''} class="w-full text-left p-3 rounded-2xl border ${answered ? (oIdx === item.correctIndex ? 'bg-teal-100 border-teal-400 font-bold' : 'bg-slate-50 border-slate-200 opacity-60') : 'border-slate-200 hover:border-teal-500 hover:bg-teal-50'} text-xs font-medium transition flex items-start gap-2">
+                            <span class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px]">${String.fromCharCode(65 + oIdx)}</span>
+                            <span class="flex-1">${opt}</span>
+                            ${answered && oIdx === item.correctIndex ? '<span>🎯</span>' : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('g3-btn-prev').disabled = currentG3Idx === 0;
+            renderDots('g3-dots', gagasanData.length, currentG3Idx, g3Answers, (idx) => { currentG3Idx = idx; renderG3Question(); });
+        }
+
+        function submitG3Answer(isCorrect, explanation) {
+            const item = gagasanData[currentG3Idx];
+            if (g3Answers[item.id]) return;
+
+            g3Answers[item.id] = { isCorrect };
+            autoAdvancePending = true;
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 100;
+                updateScore();
+                showModal('🎯 Sangat Tepat!', explanation, '🎯');
+            } else {
+                playSound('wrong');
+                showModal('❌ Kurang Tepat', explanation, '❌');
+            }
+
+            renderG3Question();
+            if (currentStudent.name && currentStudent.class) saveCurrentProgress();
+
+            if (Object.keys(g3Answers).length >= gagasanData.length) {
+                setTimeout(triggerFinishCelebration, 1200);
+            }
+        }
+
+        function nextG3Question() {
+            if (currentG3Idx < gagasanData.length - 1) {
+                currentG3Idx++;
+                renderG3Question();
+            }
+        }
+        function prevG3Question() {
+            if (currentG3Idx > 0) {
+                currentG3Idx--;
+                renderG3Question();
+            }
+        }
+
+        // Indicator Dots Component
+        function renderDots(containerId, total, currentIdx, answersObj, onClickFn) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('button');
+                const isAnswered = answersObj[i + 1];
+                let bgClass = "bg-slate-300";
+
+                if (i === currentIdx) {
+                    bgClass = "bg-indigo-600 w-5";
+                } else if (isAnswered) {
+                    bgClass = isAnswered.isCorrect ? "bg-emerald-500" : "bg-rose-400";
+                }
+
+                dot.className = `h-2.5 rounded-full transition-all duration-200 ${bgClass} ${i === currentIdx ? '' : 'w-2.5'}`;
+                dot.onclick = () => onClickFn(i);
+                container.appendChild(dot);
+            }
+        }
+
+        // Database Simulasi Guru
+        let studentScores = [
+            { id: 101, name: "Ahmad Rizky", class: "9A", score: 1000, time: "02:15", timestamp: "03/10/2026, 08:30" },
+            { id: 102, name: "Bina Salsabila", class: "9A", score: 1200, time: "01:45", timestamp: "03/10/2026, 08:42" },
+            { id: 103, name: "Citra Dewi", class: "9B", score: 900, time: "03:10", timestamp: "03/10/2026, 09:12" },
+            { id: 104, name: "Doni Prasetyo", class: "9B", score: 1100, time: "02:50", timestamp: "03/10/2026, 09:25" }
+        ];
+
+        let selectedClassFilter = 'ALL';
+
+        function triggerFinishCelebration() {
+            playSound('fanfare');
+            playSound('applause');
+            startConfetti();
+
+            const studentNameStr = (currentStudent.name && currentStudent.class) 
+                ? `${currentStudent.name} (${currentStudent.class})` 
+                : 'Siswa Hebat';
+
+            document.getElementById('finish-student-name').innerText = studentNameStr;
+            document.getElementById('finish-score').innerText = score;
+            document.getElementById('finish-modal').classList.remove('hidden');
+        }
+
+        function closeFinishModal() {
+            document.getElementById('finish-modal').classList.add('hidden');
+            stopConfetti();
+            switchTab('guru');
+        }
+
+        // Confetti Canvas
+        let confettiAnimationId = null;
+        let confettiParticles = [];
+
+        function startConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
+            confettiParticles = [];
+
+            for (let i = 0; i < 100; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 6,
+                    h: Math.random() * 16 + 8,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360,
+                    rotSpeed: Math.random() * 4 - 2
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiParticles.forEach(p => {
+                    ctx.save();
+                    ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.rotSpeed;
+
+                    if (p.y > canvas.height) {
+                        p.y = -20;
+                        p.x = Math.random() * canvas.width;
+                    }
+                });
+                confettiAnimationId = requestAnimationFrame(draw);
+            }
+
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+            draw();
+            setTimeout(stopConfetti, 5000);
+        }
+
+        function stopConfetti() {
+            if (confettiAnimationId) {
+                cancelAnimationFrame(confettiAnimationId);
+                confettiAnimationId = null;
+            }
+            const canvas = document.getElementById('confetti-canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function populateExportTexts() {
+            document.getElementById('export-fakta-opini').value = 
+`FAKTA:
+Berdasarkan data WHO, sekitar 9 dari 10 orang di dunia menghirup udara yang tercemar polusi tinggi.
+Sampah plastik membutuhkan waktu hingga 500 tahun untuk dapat terurai secara alami di dalam tanah.
+Kementerian Kesehatan mencatat peningkatan kasus penyakit ISPA sebesar 18% akibat polusi udara.
+Berdasarkan data KLHK tahun 2023, Indonesia menghasilkan sekitar 19,4 juta ton sampah per tahun.
+Penelitian IPB menunjukkan bahwa kandungan mikroplastik ditemukan pada 80% sampel ikan air tawar.
+
+OPINI:
+Menurut saya, membawa botol minum sendiri ke sekolah adalah langkah paling keren untuk mengurangi sampah.
+Konsumsi minuman berpenyedap manis diperkirakan akan memicu kenaikan angka penderita diabetes remaja.
+Sebaiknya kantin sekolah melarang secara total penjualan makanan berkemasan plastik sekali pakai.
+Menurut sebagian siswa, rasa makanan organik kurang lezat dibanding makanan cepat saji.
+Alangkah baiknya jika setiap hari Jumat diselenggarakan kegiatan jalan sehat untuk seluruh warga sekolah.`;
+
+            document.getElementById('export-denotatif').value = 
+`1. Menggagalkan
+- Denotatif: Membuat mampet / tidak lancar secara fisik
+- Konotatif: Membuat kecewa / patah hati
+
+2. Menular
+- Denotatif: Berpindahnya kuman / penyakit
+- Konotatif: Memberikan pengaruh positif / meluas
+
+3. Demam
+- Denotatif: Kondisi medis fisik suhu tubuh tinggi
+- Konotatif: Gandrung / tren kegemaran sesuatu
+
+4. Hijau
+- Denotatif: Warna pigmen klorofil pada daun
+- Konotatif: Pelindung lingkungan alami / kiasan ekologis
+
+5. Menyaring
+- Denotatif: Memisahkan zat kotoran secara biologis organ tubuh
+- Konotatif: Memilih informasi baik dan buruk di media sosial`;
+
+            document.getElementById('export-gagasan').value = 
+`1. Polusi udara di kawasan perkotaan kini berada pada level yang mengkhawatirkan.
+2. Mengonsumsi air putih minimal 2 liter per hari memiliki banyak manfaat bagi kesehatan tubuh.
+3. Memilah sampah rumah tangga merupakan langkah awal penting mengatasi krisis lingkungan.
+4. Pentingnya tidur cukup 7-8 jam sehari bagi kesehatan fisik dan mental remaja.
+5. Manfaat positif penghijauan dan penanaman pohon di lingkungan sekolah.`;
+        }
+
+        function resetCurrentGame() {
+            score = 0;
+            currentG1Idx = 0;
+            currentG2Idx = 0;
+            currentG3Idx = 0;
+            g1Answers = {};
+            g2Answers = {};
+            g3Answers = {};
+            updateScore();
+            initTimer();
+            renderG1Question();
+            renderG2Question();
+            renderG3Question();
+            stopConfetti();
+            showModal('🔄 Game Direset', 'Skor dan progress pengerjaan telah diulang dari awal.', '🔄');
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'fanfare') {
+                    const now = audioCtx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const subOsc = audioCtx.createOscillator();
+                        const subGain = audioCtx.createGain();
+                        subOsc.connect(subGain);
+                        subGain.connect(audioCtx.destination);
+                        subOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        subGain.gain.setValueAtTime(0.1, now + idx * 0.1);
+                        subGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+                        subOsc.start(now + idx * 0.1);
+                        subOsc.stop(now + idx * 0.1 + 0.35);
+                    });
+                } else if (type === 'applause') {
+                    // Synthesized Applause / Clapping Sound Effect
+                    const bufferSize = audioCtx.sampleRate * 2.5;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 1200;
+                    filter.Q.value = 1.2;
+
+                    const noiseGain = audioCtx.createGain();
+                    const now = audioCtx.currentTime;
+                    noiseGain.gain.setValueAtTime(0.01, now);
+                    noiseGain.gain.linearRampToValueAtTime(0.25, now + 0.2);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+                    noise.connect(filter);
+                    filter.connect(noiseGain);
+                    noiseGain.connect(audioCtx.destination);
+
+                    noise.start(now);
+                    noise.stop(now + 2.5);
+
+                    // Rhythmic clap pops
+                    for (let i = 0; i < 28; i++) {
+                        const clapTime = now + Math.random() * 2.2;
+                        const clapOsc = audioCtx.createOscillator();
+                        const clapGain = audioCtx.createGain();
+                        clapOsc.type = 'triangle';
+                        clapOsc.frequency.setValueAtTime(120 + Math.random() * 220, clapTime);
+                        clapGain.gain.setValueAtTime(0.12, clapTime);
+                        clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + 0.04);
+                        clapOsc.connect(clapGain);
+                        clapGain.connect(audioCtx.destination);
+                        clapOsc.start(clapTime);
+                        clapOsc.stop(clapTime + 0.04);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function saveCurrentProgress() {
+            if (!currentStudent.name || !currentStudent.class) return;
+
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('id-ID') + ', ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const secs = String(secondsElapsed % 60).padStart(2, '0');
+            const duration = `${mins}:${secs}`;
+
+            const existingIdx = studentScores.findIndex(s => s.name.toLowerCase() === currentStudent.name.toLowerCase() && s.class === currentStudent.class);
+            
+            if (existingIdx >= 0) {
+                studentScores[existingIdx].score = score;
+                studentScores[existingIdx].time = duration;
+                studentScores[existingIdx].timestamp = timestamp;
+            } else {
+                studentScores.unshift({
+                    id: Date.now(),
+                    name: currentStudent.name,
+                    class: currentStudent.class,
+                    score: score,
+                    time: duration,
+                    timestamp: timestamp
+                });
+            }
+
+            renderTeacherTable();
+        }
+
+        function updateScore() {
+            document.getElementById('score-display').innerText = score;
+        }
+
+        function initTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition";
+            });
+            document.getElementById(`btn-${tabId}`).className = "tab-btn bg-white text-indigo-950 shadow px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition";
+
+            if (tabId === 'export') {
+                populateExportTexts();
+            } else if (tabId === 'guru') {
+                renderTeacherTable();
+            }
+        }
+
+        function copyToClipboard(id) {
+            const textarea = document.getElementById(id);
+            textarea.select();
+            document.execCommand('copy');
+            showModal('📋 Berhasil Disalin!', 'Teks format telah disalin ke clipboard Anda! Tinggal lakukan Paste di Wordwall.net.', '📋');
+        }
+
+        function filterTeacherClass(cls) {
+            selectedClassFilter = cls;
+            document.querySelectorAll('.class-filter-btn').forEach(btn => {
+                btn.className = "class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600";
+            });
+            document.getElementById(`filter-btn-${cls}`).className = "class-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm";
+            renderTeacherTable();
+        }
+
+        function renderTeacherTable() {
+            const tbody = document.getElementById('teacher-table-body');
+            if (!tbody) return;
+
+            const searchQuery = (document.getElementById('search-student')?.value || '').toLowerCase();
+
+            let filtered = studentScores.filter(s => {
+                const matchClass = selectedClassFilter === 'ALL' || s.class === selectedClassFilter;
+                const matchSearch = s.name.toLowerCase().includes(searchQuery);
+                return matchClass && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 font-medium">Belum ada data nilai.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, idx) => `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-3 font-semibold text-slate-900">${s.name}</td>
+                    <td class="p-3 text-center"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold text-xs">${s.class}</span></td>
+                    <td class="p-3 text-center font-game font-extrabold text-emerald-600 text-sm">${s.score}</td>
+                    <td class="p-3 text-center font-mono text-slate-600">${s.time}</td>
+                    <td class="p-3 text-center text-slate-500 text-[11px]">${s.timestamp}</td>
+                    <td class="p-3 text-center">
+                        <span class="${s.score >= 400 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-2 py-0.5 rounded-full text-[10px] font-bold">
+                            ${s.score >= 400 ? 'Tuntas' : 'Perlu Latihan'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,No,Nama Siswa,Kelas,Skor,Durasi Waktu,Tanggal,Status\n";
+            studentScores.forEach((s, idx) => {
+                const status = s.score >= 400 ? "Tuntas" : "Perlu Latihan";
+                csvContent += `${idx + 1},"${s.name}",${s.class},${s.score},${s.time},"${s.timestamp}",${status}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekap_Nilai_Wordwall_Kelas_9_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showModal('📥 File Diunduh!', 'File CSV rekap nilai berhasil diunduh.', '📥');
+        }
+
+        function resetAllScores() {
+            studentScores = [];
+            renderTeacherTable();
+            showModal('🗑️ Data Direset', 'Semua data rekap nilai siswa telah dibersihkan.', '🗑️');
+        }
+
+        function showModal(title, message, icon = '🎉') {
+            document.getElementById('modal-icon').innerText = icon;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            if (autoAdvancePending) {
+                autoAdvancePending = false;
+                if (activeTab === 'game1') {
+                    nextG1Question();
+                } else if (activeTab === 'game2') {
+                    nextG2Question();
+                } else if (activeTab === 'game3') {
+                    nextG3Question();
+                }
+            }
+        }
+
+        window.onload = function() {
+            renderG1Question();
+            renderG2Question();
+            renderG3Question();
+            renderTeacherTable();
+        };
+    </script>
+</body>
+</html>
